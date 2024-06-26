@@ -1,6 +1,5 @@
 <?php
 
-// config for Michal Drobny/ApplicationVersioning
 return [
-
+    'version_file_path' => base_path('version.yaml'),
 ];

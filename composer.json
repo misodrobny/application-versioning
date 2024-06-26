@@ -1,12 +1,14 @@
 {
-    "name": "54170028-misodrobny/application-versioning",
-    "description": "This is my package application-versioning",
+    "name": "misodrobny/application-versioning",
+    "description": "Laravel package for application versioning in your application with ease.",
     "keywords": [
         "Michal Drobny",
         "laravel",
-        "application-versioning"
+        "Application Versioning",
+        "Versioning",
+        "Version"
     ],
-    "homepage": "https://github.com/54170028-misodrobny/application-versioning",
+    "homepage": "https://github.com/misodrobny/application-versioning",
     "license": "MIT",
     "authors": [
         {
@@ -16,9 +18,8 @@
         }
     ],
     "require": {
-        "php": "^8.2",
-        "spatie/laravel-package-tools": "^1.16",
-        "illuminate/contracts": "^10.0||^11.0"
+        "php": "^8.3",
+        "spatie/laravel-package-tools": "^1.16"
     },
     "require-dev": {
         "laravel/pint": "^1.14",
@@ -35,13 +36,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Michal Drobny\\ApplicationVersioning\\": "src/",
-            "Michal Drobny\\ApplicationVersioning\\Database\\Factories\\": "database/factories/"
+            "DrobnyDev\\ApplicationVersioning\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Michal Drobny\\ApplicationVersioning\\Tests\\": "tests/",
+            "DrobnyDev\\ApplicationVersioning\\Tests\\": "tests/",
             "Workbench\\App\\": "workbench/app/"
         }
     },
@@ -73,10 +73,10 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Michal Drobny\\ApplicationVersioning\\ApplicationVersioningServiceProvider"
+                "DrobnyDev\\ApplicationVersioning\\ApplicationVersioningServiceProvider"
             ],
             "aliases": {
-                "ApplicationVersioning": "Michal Drobny\\ApplicationVersioning\\Facades\\ApplicationVersioning"
+                "ApplicationVersion": "DrobnyDev\\ApplicationVersioning\\Facades\\ApplicationVersioning"
             }
         }
     },
