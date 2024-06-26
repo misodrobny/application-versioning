@@ -37,6 +37,6 @@ class IncreaseVersionCommand extends Command
 
     private function message(string $type): void
     {
-        $this->info("$type version increased. Current version is now: ". ApplicationVersioning::getFormatedVersion());
+        $this->info("$type version increased. Current version is now: ".ApplicationVersioning::getFormatedVersion());
     }
 }

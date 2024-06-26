@@ -18,6 +18,6 @@ class IncreaseMajorVersionCommand extends Command
     public function handle(): void
     {
         (new ApplicationVersioning())->increaseMajor();
-        $this->info('Major version increased. Current version is now: '. ApplicationVersioning::getFormatedVersion());
+        $this->info('Major version increased. Current version is now: '.ApplicationVersioning::getFormatedVersion());
     }
 }
