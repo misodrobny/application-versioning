@@ -1,9 +1,9 @@
 # This is my package application-versioning
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/54170028-misodrobny/application-versioning.svg?style=flat-square)](https://packagist.org/packages/54170028-misodrobny/application-versioning)
-[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/54170028-misodrobny/application-versioning/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/54170028-misodrobny/application-versioning/actions?query=workflow%3Arun-tests+branch%3Amain)
-[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/54170028-misodrobny/application-versioning/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/54170028-misodrobny/application-versioning/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
-[![Total Downloads](https://img.shields.io/packagist/dt/54170028-misodrobny/application-versioning.svg?style=flat-square)](https://packagist.org/packages/54170028-misodrobny/application-versioning)
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/misodrobny/application-versioning.svg?style=flat-square)](https://packagist.org/packages/misodrobny/application-versioning)
+[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/misodrobny/application-versioning/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/misodrobny/application-versioning/actions?query=workflow%3Arun-tests+branch%3Amain)
+[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/misodrobny/application-versioning/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/misodrobny/application-versioning/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
+[![Total Downloads](https://img.shields.io/packagist/dt/misodrobny/application-versioning.svg?style=flat-square)](https://packagist.org/packages/misodrobny/application-versioning)
 
 This is where your description should go. Limit it to a paragraph or two. Consider adding a small example.
 
