@@ -44,6 +44,7 @@ class ApplicationVersioning
 
     //region ---- Private members ----
     private string $versionFilePath;
+
     private function getYamlContent(): mixed
     {
         return Yaml::parse(file_get_contents($this->versionFilePath));
