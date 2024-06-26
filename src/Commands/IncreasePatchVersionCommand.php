@@ -8,7 +8,7 @@ use Illuminate\Console\Command;
 
 class IncreasePatchVersionCommand extends Command
 {
-    protected $signature = 'application-version:patch';
+    protected $signature = 'application-version:increase-patch';
 
     protected $description = 'Increase patch version';
 
@@ -18,5 +18,6 @@ class IncreasePatchVersionCommand extends Command
     public function handle(): void
     {
         (new ApplicationVersioning())->increasePatch();
+        $this->info('Patch version increased. Current version is now: '. ApplicationVersioning::getFormatedVersion());
     }
 }

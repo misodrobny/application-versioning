@@ -1,59 +1,53 @@
-# This is my package application-versioning
+# This is my package Application versioning
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/misodrobny/application-versioning.svg?style=flat-square)](https://packagist.org/packages/misodrobny/application-versioning)
 [![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/misodrobny/application-versioning/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/misodrobny/application-versioning/actions?query=workflow%3Arun-tests+branch%3Amain)
 [![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/misodrobny/application-versioning/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/misodrobny/application-versioning/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
 [![Total Downloads](https://img.shields.io/packagist/dt/misodrobny/application-versioning.svg?style=flat-square)](https://packagist.org/packages/misodrobny/application-versioning)
 
-This is where your description should go. Limit it to a paragraph or two. Consider adding a small example.
+This package will help to manage version of your application. It will create version.yaml file in root of your project and you can manage version of your application in this file.
 
-## Support us
-
-[<img src="https://github-ads.s3.eu-central-1.amazonaws.com/application-versioning.jpg?t=1" width="419px" />](https://spatie.be/github-ad-click/application-versioning)
-
-We invest a lot of resources into creating [best in class open source packages](https://spatie.be/open-source). You can support us by [buying one of our paid products](https://spatie.be/open-source/support-us).
-
-We highly appreciate you sending us a postcard from your hometown, mentioning which of our package(s) you are using. You'll find our address on [our contact page](https://spatie.be/about-us). We publish all received postcards on [our virtual postcard wall](https://spatie.be/open-source/postcards).
+For more about application versioning please follow [Semantic Versioning](https://semver.org/)
 
 ## Installation
 
 You can install the package via composer:
 
 ```bash
-composer require 54170028-misodrobny/application-versioning
+composer require misodrobny/application-versioning
 ```
 
-You can publish and run the migrations with:
-
+After installation, you need to run install script which will publish config file and create default version.yaml file.
 ```bash
-php artisan vendor:publish --tag="application-versioning-migrations"
-php artisan migrate
-```
-
-You can publish the config file with:
-
-```bash
-php artisan vendor:publish --tag="application-versioning-config"
+php artisan application-versioning:install
 ```
 
 This is the contents of the published config file:
 
 ```php
 return [
+    'version_file_path' => base_path('version.yaml'),
 ];
-```
-
-Optionally, you can publish the views using
-
-```bash
-php artisan vendor:publish --tag="application-versioning-views"
 ```
 
 ## Usage
 
+For getting version of your application you can use facade `ApplicationVersion`
 ```php
-$applicationVersioning = new Michal Drobny\ApplicationVersioning();
-echo $applicationVersioning->echoPhrase('Hello, Michal Drobny!');
+    echo ApplicationVersion::getFormatedVersion();
+```
+
+To increase version of your application you can use following methods:
+```php
+    (new ApplicationVersioning)->increaseMajor();
+    (new ApplicationVersioning)->increaseMinor();
+    (new ApplicationVersioning)->increasePatch();
+```
+It is also possible to run 
+```bash
+php artisan application-version:increase-major 
+php artisan application-version:increase-minor 
+php artisan application-version:increase-patch 
 ```
 
 ## Testing

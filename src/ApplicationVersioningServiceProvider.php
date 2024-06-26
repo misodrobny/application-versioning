@@ -5,6 +5,7 @@ namespace DrobnyDev\ApplicationVersioning;
 use DrobnyDev\ApplicationVersioning\Commands\IncreaseMajorVersionCommand;
 use DrobnyDev\ApplicationVersioning\Commands\IncreaseMinorVersionCommand;
 use DrobnyDev\ApplicationVersioning\Commands\IncreasePatchVersionCommand;
+use DrobnyDev\ApplicationVersioning\Commands\IncreaseVersionCommand;
 use Exception;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
@@ -25,6 +26,7 @@ class ApplicationVersioningServiceProvider extends PackageServiceProvider
             ->hasCommand(IncreaseMajorVersionCommand::class)
             ->hasCommand(IncreaseMinorVersionCommand::class)
             ->hasCommand(IncreasePatchVersionCommand::class)
+            ->hasCommand(IncreaseVersionCommand::class)
             ->hasInstallCommand(function (InstallCommand $command) {
                 $command
                     ->startWith(function (InstallCommand $command) {
@@ -33,7 +35,7 @@ class ApplicationVersioningServiceProvider extends PackageServiceProvider
                         if (! file_exists(base_path('version.yaml'))) {
                             try {
                                 file_put_contents(base_path('version.yaml'), "version:\n".
-                                    'current: { major: '.date('Y').', minor: 0, patch: 0, format: $major.$minor.$patch }');
+                                    'current: { major: 0, minor: 0, patch: 1, format: $major.$minor.$patch }');
 
                                 $command->info('version.yaml file created successfully.');
                             } catch (Exception) {

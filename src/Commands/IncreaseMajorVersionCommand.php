@@ -8,7 +8,7 @@ use Illuminate\Console\Command;
 
 class IncreaseMajorVersionCommand extends Command
 {
-    protected $signature = 'application-version:major';
+    protected $signature = 'application-version:increase-major';
 
     protected $description = 'Increase major version';
 
@@ -18,5 +18,6 @@ class IncreaseMajorVersionCommand extends Command
     public function handle(): void
     {
         (new ApplicationVersioning())->increaseMajor();
+        $this->info('Major version increased. Current version is now: '. ApplicationVersioning::getFormatedVersion());
     }
 }
