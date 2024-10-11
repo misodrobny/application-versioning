@@ -3,6 +3,7 @@
 namespace DrobnyDev\ApplicationVersioning;
 
 use DrobnyDev\ApplicationVersioning\Exceptions\InvalidArgumentException;
+use DrobnyDev\ApplicationVersioning\Support\GitSupport;
 use Symfony\Component\Yaml\Yaml;
 
 class ApplicationVersioning
@@ -12,6 +13,8 @@ class ApplicationVersioning
     const string MINOR = 'minor';
 
     const string PATCH = 'patch';
+
+    const string GIT_HASH = 'git_hash';
 
     public function __construct()
     {
@@ -43,14 +46,14 @@ class ApplicationVersioning
     }
 
     //region ---- Private members ----
-    private string $versionFilePath;
+    public string $versionFilePath;
 
-    private function getYamlContent(): mixed
+    public function getYamlContent(): mixed
     {
         return Yaml::parse(file_get_contents($this->versionFilePath));
     }
 
-    private function getFormat(): string
+    public function getFormat(): string
     {
         $yamlContents = $this->getYamlContent();
 
@@ -60,7 +63,7 @@ class ApplicationVersioning
     /**
      * @throws InvalidArgumentException
      */
-    private function increaseVersion(string $type): void
+    public function increaseVersion(string $type): void
     {
         if ($type !== self::MAJOR && $type !== self::MINOR && $type !== self::PATCH) {
             throw new InvalidArgumentException('Invalid version type');
@@ -75,19 +78,20 @@ class ApplicationVersioning
     /**
      * @return string[]
      */
-    private function getVersionConstants(): array
+    public function getVersionConstants(): array
     {
         return [
             '$'.self::MAJOR,
             '$'.self::MINOR,
             '$'.self::PATCH,
+            '$'.self::GIT_HASH
         ];
     }
 
     /**
      * @return string[]
      */
-    private function getCurrentVersions(): array
+    public function getCurrentVersions(): array
     {
         $yamlContents = $this->getYamlContent();
 
@@ -95,6 +99,7 @@ class ApplicationVersioning
             $yamlContents['version']['current']['major'],
             $yamlContents['version']['current']['minor'],
             $yamlContents['version']['current']['patch'],
+            GitSupport::getCurrentHeadHash()
         ];
     }
     // endregion

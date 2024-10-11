@@ -13,6 +13,14 @@ use Spatie\LaravelPackageTools\PackageServiceProvider;
 
 class ApplicationVersioningServiceProvider extends PackageServiceProvider
 {
+    public function register(): void
+    {
+        // Binding a singleton
+        $this->app->singleton(ApplicationVersioning::class, function () {
+            return new ApplicationVersioning();
+        });
+    }
+
     public function configurePackage(Package $package): void
     {
         /*
@@ -34,8 +42,8 @@ class ApplicationVersioningServiceProvider extends PackageServiceProvider
 
                         if (! file_exists(base_path('version.yaml'))) {
                             try {
-                                file_put_contents(base_path('version.yaml'), "version:\n".
-                                    'current: { major: 0, minor: 0, patch: 1, format: $major.$minor.$patch }');
+                                file_put_contents(base_path('version.yaml'), "version:\n\t".
+                                    'current: { major: 0, minor: 0, patch: 1, format: $major.$minor.$patch - $git_hash }');
 
                                 $command->info('version.yaml file created successfully.');
                             } catch (Exception) {
