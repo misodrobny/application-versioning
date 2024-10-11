@@ -15,7 +15,7 @@ class ApplicationVersioningServiceProvider extends PackageServiceProvider
 {
     public function packageRegistered(): void
     {
-        $this->app->singleton(ApplicationVersioning::class, fn () => new ApplicationVersioning());
+        $this->app->singleton(ApplicationVersioning::class, fn () => new ApplicationVersioning);
     }
 
     public function configurePackage(Package $package): void
