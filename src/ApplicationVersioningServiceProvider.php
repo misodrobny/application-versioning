@@ -13,12 +13,9 @@ use Spatie\LaravelPackageTools\PackageServiceProvider;
 
 class ApplicationVersioningServiceProvider extends PackageServiceProvider
 {
-    public function register(): void
+    public function packageRegistered(): void
     {
-        // Binding a singleton
-        $this->app->singleton(ApplicationVersioning::class, function () {
-            return new ApplicationVersioning;
-        });
+        $this->app->singleton(ApplicationVersioning::class, fn () => new ApplicationVersioning());
     }
 
     public function configurePackage(Package $package): void
