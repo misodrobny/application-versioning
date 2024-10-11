@@ -30,6 +30,12 @@ return [
 ];
 ```
 
+Initial formated version has following structure:
+```php
+$major.$minor.$patch - $git_hash
+```
+`$git_hash` contains 7 characters long GIT HASH from current git commit. 
+
 ## Usage
 
 For getting version of your application you can use facade `ApplicationVersion`
