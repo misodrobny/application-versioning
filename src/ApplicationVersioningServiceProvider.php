@@ -17,7 +17,7 @@ class ApplicationVersioningServiceProvider extends PackageServiceProvider
     {
         // Binding a singleton
         $this->app->singleton(ApplicationVersioning::class, function () {
-            return new ApplicationVersioning();
+            return new ApplicationVersioning;
         });
     }
 

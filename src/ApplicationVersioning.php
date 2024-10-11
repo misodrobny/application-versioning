@@ -84,7 +84,7 @@ class ApplicationVersioning
             '$'.self::MAJOR,
             '$'.self::MINOR,
             '$'.self::PATCH,
-            '$'.self::GIT_HASH
+            '$'.self::GIT_HASH,
         ];
     }
 
@@ -99,7 +99,7 @@ class ApplicationVersioning
             $yamlContents['version']['current']['major'],
             $yamlContents['version']['current']['minor'],
             $yamlContents['version']['current']['patch'],
-            GitSupport::getCurrentHeadHash()
+            GitSupport::getCurrentHeadHash(),
         ];
     }
     // endregion
@@ -107,7 +107,7 @@ class ApplicationVersioning
     //region ---- Static members ----
     public static function getFormatedVersion(): string
     {
-        $self = new ApplicationVersioning();
+        $self = new ApplicationVersioning;
 
         return str_replace(
             search: $self->getVersionConstants(),

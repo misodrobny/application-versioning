@@ -17,7 +17,7 @@ class IncreasePatchVersionCommand extends Command
      */
     public function handle(): void
     {
-        (new ApplicationVersioning())->increasePatch();
+        (new ApplicationVersioning)->increasePatch();
         $this->info('Patch version increased. Current version is now: '.ApplicationVersioning::getFormatedVersion());
     }
 }

@@ -3,6 +3,7 @@
 namespace DrobnyDev\ApplicationVersioning\Support;
 
 use Illuminate\Support\Facades\Cache;
+
 class GitSupport
 {
     public const string CACHE_KEY = 'GitSupport.CurrentHash';

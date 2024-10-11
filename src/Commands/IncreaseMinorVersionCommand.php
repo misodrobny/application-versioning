@@ -17,7 +17,7 @@ class IncreaseMinorVersionCommand extends Command
      */
     public function handle(): void
     {
-        (new ApplicationVersioning())->increaseMinor();
+        (new ApplicationVersioning)->increaseMinor();
         $this->info('Minor version increased. Current version is now: '.ApplicationVersioning::getFormatedVersion());
     }
 }

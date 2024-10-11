@@ -19,15 +19,15 @@ class IncreaseVersionCommand extends Command
     {
         switch ($this->option('type')) {
             case '=major':
-                (new ApplicationVersioning())->increaseMajor();
+                (new ApplicationVersioning)->increaseMajor();
                 $this->message('Major');
                 break;
             case '=minor':
-                (new ApplicationVersioning())->increaseMinor();
+                (new ApplicationVersioning)->increaseMinor();
                 $this->message('Minor');
                 break;
             case '=patch':
-                (new ApplicationVersioning())->increasePatch();
+                (new ApplicationVersioning)->increasePatch();
                 $this->message('Patch');
                 break;
             default:
