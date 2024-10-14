@@ -44,6 +44,8 @@ class GitSupport
         }
 
         $currentHash = substr(@file_get_contents($currentHeadFile), 0, $hashLength);
+        /** @noinspection PhpParamsInspection */
+        // @phpstan-ignore-next-line
         Cache::set(static::CACHE_KEY, $currentHash, now()->addSeconds(static::CACHE_TTL_SECONDS));
 
         return $currentHash;
