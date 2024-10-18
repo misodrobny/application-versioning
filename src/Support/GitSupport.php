@@ -27,7 +27,7 @@ class GitSupport
             return Cache::get(static::CACHE_KEY);
         }
 
-        $gitDir = base_path().'/.git';
+        $gitDir = config('application-versioning.git_path');
         if (! is_dir($gitDir)) {
             return $default;
         }
