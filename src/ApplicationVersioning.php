@@ -45,7 +45,7 @@ class ApplicationVersioning
         $this->increaseVersion(self::PATCH);
     }
 
-    //region ---- Private members ----
+    // region ---- Private members ----
     public string $versionFilePath;
 
     public function getYamlContent(): mixed
@@ -104,7 +104,7 @@ class ApplicationVersioning
     }
     // endregion
 
-    //region ---- Static members ----
+    // region ---- Static members ----
     public static function getFormatedVersion(): string
     {
         $self = new ApplicationVersioning;
