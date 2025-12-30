@@ -51,11 +51,17 @@ To increase version of your application you can use following methods:
 ```
 It is also possible to run 
 ```bash
-php artisan application-version:increase-major 
-php artisan application-version:increase-minor 
-php artisan application-version:increase-patch 
+php artisan application-version:increase 
 ```
+This command will generate Laravel Prompt window for choosing which version needs update:
 
+```bash
+┌ Which version do you want to increase? ──────────────────────┐
+│   ○ major                                                    │
+│   ○ minor                                                    │
+│ › ● patch                                                    │
+└──────────────────────────────────────────────────────────────┘
+```
 ## Testing
 
 ```bash
