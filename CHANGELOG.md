@@ -2,6 +2,10 @@
 
 All notable changes to `application-versioning` will be documented in this file.
 
+## 0.1.0 - 2025-12-30
+
+Couple of usability update like single laravel prompt command.
+
 ## Hotfix: missing requirement - 2024-10-14
 
 Fix:
