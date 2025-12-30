@@ -34,7 +34,7 @@ class ApplicationVersioningServiceProvider extends PackageServiceProvider
                         if (! file_exists(base_path('version.yaml'))) {
                             try {
                                 file_put_contents(base_path('version.yaml'), "version:\n  ".
-                                    'current: { major: ' . date('Y') . ', minor: '.date('n').', patch: 1, format: $major.$minor.$patch - $git_hash }');
+                                    'current: { major: '.date('Y').', minor: '.date('n').', patch: 1, format: $major.$minor.$patch - $git_hash }');
 
                                 $command->info('version.yaml file created successfully.');
                             } catch (Exception) {
