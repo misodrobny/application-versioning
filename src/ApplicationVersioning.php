@@ -90,6 +90,7 @@ class ApplicationVersioning
 
     /**
      * @return string[]
+     *
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getCurrentVersions(): array

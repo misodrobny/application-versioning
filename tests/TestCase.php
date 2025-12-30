@@ -14,5 +14,5 @@ class TestCase extends Orchestra
         ];
     }
 
-    public function getEnvironmentSetUp($app):void {}
+    public function getEnvironmentSetUp($app): void {}
 }

@@ -18,6 +18,7 @@ class GitSupport
      * @param  int  $hashLength  Required length of hash to return
      * @param  mixed|null  $default  Default value to return if no hash available
      * @return string|null Current heads' hash
+     *
      * @throws InvalidArgumentException
      */
     public static function getCurrentHeadHash(
