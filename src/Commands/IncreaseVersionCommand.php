@@ -5,6 +5,7 @@ namespace DrobnyDev\ApplicationVersioning\Commands;
 use DrobnyDev\ApplicationVersioning\ApplicationVersioning;
 use DrobnyDev\ApplicationVersioning\Exceptions\InvalidArgumentException;
 use Illuminate\Console\Command;
+
 use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\info;
 use function Laravel\Prompts\select;
@@ -25,6 +26,7 @@ class IncreaseVersionCommand extends Command
                 $this->call('application-versioning:install');
             } else {
                 $this->warn('Aborted. version.yaml is required.');
+
                 return;
             }
         }
