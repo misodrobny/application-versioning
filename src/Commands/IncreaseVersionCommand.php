@@ -5,6 +5,7 @@ namespace DrobnyDev\ApplicationVersioning\Commands;
 use DrobnyDev\ApplicationVersioning\ApplicationVersioning;
 use DrobnyDev\ApplicationVersioning\Exceptions\InvalidArgumentException;
 use Illuminate\Console\Command;
+use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\info;
 use function Laravel\Prompts\select;
 
@@ -19,6 +20,15 @@ class IncreaseVersionCommand extends Command
      */
     public function handle(): void
     {
+        if (! file_exists(base_path('version.yaml'))) {
+            if (confirm('version.yaml not found. Do you want to run the installation command?', default: true)) {
+                $this->call('application-versioning:install');
+            } else {
+                $this->warn('Aborted. version.yaml is required.');
+                return;
+            }
+        }
+
         $versionType = select(
             label: 'Which version do you want to increase?',
             options: ['major', 'minor', 'patch'],
