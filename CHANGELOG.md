@@ -2,6 +2,10 @@
 
 All notable changes to `application-versioning` will be documented in this file.
 
+## 0.1.1 - 2025-12-30
+
+Fix: Missing new Readme
+
 ## 0.1.0 - 2025-12-30
 
 Couple of usability update like single laravel prompt command.
