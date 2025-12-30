@@ -5,6 +5,7 @@ namespace DrobnyDev\ApplicationVersioning\Commands;
 use DrobnyDev\ApplicationVersioning\ApplicationVersioning;
 use DrobnyDev\ApplicationVersioning\Exceptions\InvalidArgumentException;
 use Illuminate\Console\Command;
+
 use function Laravel\Prompts\info;
 use function Laravel\Prompts\select;
 
