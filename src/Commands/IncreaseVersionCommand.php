@@ -17,7 +17,7 @@ class IncreaseVersionCommand extends Command
     protected $description = 'Increase major, minor or patch version';
 
     /**
-     * @throws InvalidArgumentException
+     * @throws InvalidArgumentException|\Psr\SimpleCache\InvalidArgumentException
      */
     public function handle(): void
     {

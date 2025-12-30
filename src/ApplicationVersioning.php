@@ -90,6 +90,7 @@ class ApplicationVersioning
 
     /**
      * @return string[]
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getCurrentVersions(): array
     {
@@ -105,6 +106,9 @@ class ApplicationVersioning
     // endregion
 
     // region ---- Static members ----
+    /**
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
     public static function getFormatedVersion(): string
     {
         $self = new ApplicationVersioning;

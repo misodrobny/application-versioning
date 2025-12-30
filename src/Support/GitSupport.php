@@ -3,6 +3,7 @@
 namespace DrobnyDev\ApplicationVersioning\Support;
 
 use Illuminate\Support\Facades\Cache;
+use Psr\SimpleCache\InvalidArgumentException;
 
 class GitSupport
 {
@@ -17,6 +18,7 @@ class GitSupport
      * @param  int  $hashLength  Required length of hash to return
      * @param  mixed|null  $default  Default value to return if no hash available
      * @return string|null Current heads' hash
+     * @throws InvalidArgumentException
      */
     public static function getCurrentHeadHash(
         bool $forceRefresh = false,
@@ -44,7 +46,6 @@ class GitSupport
         }
 
         $currentHash = substr(@file_get_contents($currentHeadFile), 0, $hashLength);
-        /** @noinspection PhpParamsInspection */
         // @phpstan-ignore-next-line
         Cache::set(static::CACHE_KEY, $currentHash, now()->addSeconds(static::CACHE_TTL_SECONDS));
 
