@@ -4,8 +4,14 @@ namespace DrobnyDev\ApplicationVersioning;
 
 use DrobnyDev\ApplicationVersioning\Exceptions\InvalidArgumentException;
 use DrobnyDev\ApplicationVersioning\Support\GitSupport;
+use Illuminate\Contracts\Filesystem\Filesystem;
+use Illuminate\Support\Facades\Storage;
 use Symfony\Component\Yaml\Yaml;
 
+/**
+ * Bound as a singleton by the service provider: resolve it from the container
+ * (or use the facade) rather than instantiating it.
+ */
 class ApplicationVersioning
 {
     const string MAJOR = 'major';
@@ -16,9 +22,13 @@ class ApplicationVersioning
 
     const string GIT_HASH = 'git_hash';
 
+    const string DEFAULT_FORMAT = '$major.$minor.$patch - $git_hash';
+
     public function __construct()
     {
-        $this->versionFilePath = config('application-versioning.version_file_path');
+        $this->versionFilePath = (string) config('application-versioning.version_file_path');
+        $this->disk = config('application-versioning.disk') ?: null;
+        $this->diskPath = (string) config('application-versioning.disk_path', 'version.yaml');
     }
 
     /**
@@ -48,9 +58,33 @@ class ApplicationVersioning
     // region ---- Private members ----
     public string $versionFilePath;
 
+    public ?string $disk;
+
+    public string $diskPath;
+
+    public function exists(): bool
+    {
+        return $this->disk === null
+            ? file_exists($this->versionFilePath)
+            : $this->filesystem()->exists($this->diskPath);
+    }
+
+    /**
+     * Writes a fresh version.yaml, numbered with the current year and month.
+     */
+    public function create(): void
+    {
+        $this->write(Yaml::dump(['version' => ['current' => [
+            self::MAJOR => (int) date('Y'),
+            self::MINOR => (int) date('n'),
+            self::PATCH => 1,
+            'format' => self::DEFAULT_FORMAT,
+        ]]], 2));
+    }
+
     public function getYamlContent(): mixed
     {
-        return Yaml::parse(file_get_contents($this->versionFilePath));
+        return Yaml::parse($this->read());
     }
 
     public function getFormat(): string
@@ -72,7 +106,7 @@ class ApplicationVersioning
         $yamlContents = $this->getYamlContent();
         $yamlContents['version']['current'][$type]++;
 
-        file_put_contents($this->versionFilePath, Yaml::dump($yamlContents));
+        $this->write(Yaml::dump($yamlContents));
     }
 
     /**
@@ -104,6 +138,29 @@ class ApplicationVersioning
             GitSupport::getCurrentHeadHash(),
         ];
     }
+
+    protected function read(): string
+    {
+        return $this->disk === null
+            ? (string) file_get_contents($this->versionFilePath)
+            : (string) $this->filesystem()->get($this->diskPath);
+    }
+
+    protected function write(string $contents): void
+    {
+        if ($this->disk === null) {
+            file_put_contents($this->versionFilePath, $contents);
+
+            return;
+        }
+
+        $this->filesystem()->put($this->diskPath, $contents);
+    }
+
+    protected function filesystem(): Filesystem
+    {
+        return Storage::disk($this->disk);
+    }
     // endregion
 
     // region ---- Static members ----
@@ -112,7 +169,7 @@ class ApplicationVersioning
      */
     public static function getFormatedVersion(): string
     {
-        $self = new ApplicationVersioning;
+        $self = app(self::class);
 
         return str_replace(
             search: $self->getVersionConstants(),

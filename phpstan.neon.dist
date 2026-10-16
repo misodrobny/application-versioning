@@ -7,5 +7,8 @@ parameters:
         - src
         - config
     tmpDir: build/phpstan
+    # The package's own config/ is where env() belongs; larastan only knows the app's.
+    configDirectories:
+        - config
     checkOctaneCompatibility: true
     checkModelProperties: true

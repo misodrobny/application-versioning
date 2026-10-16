@@ -27,6 +27,9 @@ This is the contents of the published config file:
 ```php
 return [
     'version_file_path' => base_path('version.yaml'),
+    'disk' => env('APP_VERSIONING_DISK'),
+    'disk_path' => env('APP_VERSIONING_DISK_PATH', 'version.yaml'),
+    'git_path' => env('APP_VERSIONING_GIT_PATH', base_path().'/.git'),
 ];
 ```
 
@@ -34,20 +37,35 @@ Initial formated version has following structure:
 ```php
 $major.$minor.$patch - $git_hash
 ```
-`$git_hash` contains 7 characters long GIT HASH from current git commit. 
+`$git_hash` contains 7 characters long GIT HASH from current git commit. It is read from a checked out branch, from a ref stored only in `packed-refs`, and from a detached HEAD (a deployment that checks out a commit). When no hash can be read, `$git_hash` is empty instead of an exception being thrown.
+
+### Storage disk
+
+By default `version.yaml` is a local file at `version_file_path`. To read and write it through a Laravel filesystem disk instead (for example when several servers share it), set the disk and the path on that disk:
+
+```dotenv
+APP_VERSIONING_DISK=s3
+APP_VERSIONING_DISK_PATH=my-app/version.yaml
+```
+
+The install command, the increase command and all methods below then use that disk.
 
 ## Usage
 
-For getting version of your application you can use facade `ApplicationVersion`
+`ApplicationVersioning` is registered as a singleton. Resolve it from the container or use the facade `ApplicationVersion` instead of instantiating it.
+
+For getting version of your application:
 ```php
     echo ApplicationVersion::getFormatedVersion();
 ```
 
 To increase version of your application you can use following methods:
 ```php
-    (new ApplicationVersioning)->increaseMajor();
-    (new ApplicationVersioning)->increaseMinor();
-    (new ApplicationVersioning)->increasePatch();
+    use DrobnyDev\ApplicationVersioning\ApplicationVersioning;
+
+    app(ApplicationVersioning::class)->increaseMajor();
+    app(ApplicationVersioning::class)->increaseMinor();
+    app(ApplicationVersioning::class)->increasePatch();
 ```
 It is also possible to run 
 ```bash

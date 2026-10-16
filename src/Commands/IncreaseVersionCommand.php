@@ -21,7 +21,9 @@ class IncreaseVersionCommand extends Command
      */
     public function handle(): void
     {
-        if (! file_exists(base_path('version.yaml'))) {
+        $versioning = app(ApplicationVersioning::class);
+
+        if (! $versioning->exists()) {
             if (confirm('version.yaml not found. Do you want to run the installation command?')) {
                 $this->call('application-versioning:install');
             } else {
@@ -39,13 +41,13 @@ class IncreaseVersionCommand extends Command
 
         switch ($versionType) {
             case 'major':
-                (new ApplicationVersioning)->increaseMajor();
+                $versioning->increaseMajor();
                 break;
             case 'minor':
-                (new ApplicationVersioning)->increaseMinor();
+                $versioning->increaseMinor();
                 break;
             case 'patch':
-                (new ApplicationVersioning)->increasePatch();
+                $versioning->increasePatch();
                 break;
         }
 

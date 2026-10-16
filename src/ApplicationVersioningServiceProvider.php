@@ -31,10 +31,11 @@ class ApplicationVersioningServiceProvider extends PackageServiceProvider
                     ->startWith(function (InstallCommand $command) {
                         $command->info('Hello, and welcome to Application Versioning package for Laravel!');
 
-                        if (! file_exists(base_path('version.yaml'))) {
+                        $versioning = app(ApplicationVersioning::class);
+
+                        if (! $versioning->exists()) {
                             try {
-                                file_put_contents(base_path('version.yaml'), "version:\n  ".
-                                    'current: { major: '.date('Y').', minor: '.date('n').', patch: 1, format: $major.$minor.$patch - $git_hash }');
+                                $versioning->create();
 
                                 $command->info('version.yaml file created successfully.');
                             } catch (Exception) {
