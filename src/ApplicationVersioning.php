@@ -3,9 +3,12 @@
 namespace DrobnyDev\ApplicationVersioning;
 
 use DrobnyDev\ApplicationVersioning\Exceptions\InvalidArgumentException;
+use DrobnyDev\ApplicationVersioning\Exceptions\VersionFileException;
 use DrobnyDev\ApplicationVersioning\Support\GitSupport;
 use Illuminate\Contracts\Filesystem\Filesystem;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
 
 /**
@@ -23,6 +26,12 @@ class ApplicationVersioning
     const string GIT_HASH = 'git_hash';
 
     const string DEFAULT_FORMAT = '$major.$minor.$patch - $git_hash';
+
+    public string $versionFilePath;
+
+    public ?string $disk;
+
+    public string $diskPath;
 
     public function __construct()
     {
@@ -55,13 +64,6 @@ class ApplicationVersioning
         $this->increaseVersion(self::PATCH);
     }
 
-    // region ---- Private members ----
-    public string $versionFilePath;
-
-    public ?string $disk;
-
-    public string $diskPath;
-
     public function exists(): bool
     {
         return $this->disk === null
@@ -82,16 +84,61 @@ class ApplicationVersioning
         ]]], 2));
     }
 
-    public function getYamlContent(): mixed
+    /**
+     * The parsed version.yaml, after checking that version.current holds
+     * integer major, minor and patch and a string format.
+     *
+     * @return array<mixed>
+     *
+     * @throws VersionFileException
+     */
+    public function getYamlContent(): array
     {
-        return Yaml::parse($this->read());
+        if (! $this->exists()) {
+            throw new VersionFileException("version.yaml not found at {$this->location()}.");
+        }
+
+        try {
+            $content = Yaml::parse($this->read());
+        } catch (ParseException $e) {
+            throw new VersionFileException("version.yaml at {$this->location()} is not valid YAML: {$e->getMessage()}", previous: $e);
+        }
+
+        $current = is_array($content) ? ($content['version']['current'] ?? null) : null;
+
+        if (! is_array($current)) {
+            throw new VersionFileException("version.yaml at {$this->location()} has no version.current map.");
+        }
+
+        foreach ([self::MAJOR, self::MINOR, self::PATCH] as $part) {
+            if (! is_int($current[$part] ?? null)) {
+                throw new VersionFileException("version.yaml at {$this->location()} needs an integer version.current.{$part}.");
+            }
+        }
+
+        if (! is_string($current['format'] ?? null)) {
+            throw new VersionFileException("version.yaml at {$this->location()} needs a string version.current.format.");
+        }
+
+        return $content;
     }
 
+    /**
+     * True for calendar versioning (major is a year), false for SemVer.
+     *
+     * @throws VersionFileException
+     */
+    public function isCalendar(): bool
+    {
+        return $this->getYamlContent()['version']['current'][self::MAJOR] >= 2000;
+    }
+
+    /**
+     * @throws VersionFileException
+     */
     public function getFormat(): string
     {
-        $yamlContents = $this->getYamlContent();
-
-        return $yamlContents['version']['current']['format'];
+        return $this->getYamlContent()['version']['current']['format'];
     }
 
     /**
@@ -123,20 +170,56 @@ class ApplicationVersioning
     }
 
     /**
-     * @return string[]
+     * @return array{int, int, int, ?string}
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws VersionFileException
      */
     public function getCurrentVersions(): array
     {
-        $yamlContents = $this->getYamlContent();
+        $current = $this->getYamlContent()['version']['current'];
 
         return [
-            $yamlContents['version']['current']['major'],
-            $yamlContents['version']['current']['minor'],
-            $yamlContents['version']['current']['patch'],
+            $current[self::MAJOR],
+            $current[self::MINOR],
+            $current[self::PATCH],
             GitSupport::getCurrentHeadHash(),
         ];
+    }
+
+    /**
+     * The version in the file's format. Never throws: a missing or invalid
+     * version.yaml logs a warning and returns the missing_version config value.
+     */
+    public function getFormattedVersion(): string
+    {
+        try {
+            return str_replace(
+                search: $this->getVersionConstants(),
+                replace: array_map(strval(...), $this->getCurrentVersions()),
+                subject: $this->getFormat());
+        } catch (VersionFileException $e) {
+            Log::warning($e->getMessage());
+
+            return (string) config('application-versioning.missing_version', '');
+        }
+    }
+
+    /**
+     * @deprecated Since 0.3.0. Use getFormattedVersion() on the instance or the facade.
+     */
+    public static function getFormatedVersion(): string
+    {
+        return app(self::class)->getFormattedVersion();
+    }
+
+    /**
+     * Where version.yaml lives, for messages.
+     */
+    protected function location(): string
+    {
+        return $this->disk === null
+            ? $this->versionFilePath
+            : "disk {$this->disk}: {$this->diskPath}";
     }
 
     protected function read(): string
@@ -161,20 +244,4 @@ class ApplicationVersioning
     {
         return Storage::disk($this->disk);
     }
-    // endregion
-
-    // region ---- Static members ----
-    /**
-     * @throws \Psr\SimpleCache\InvalidArgumentException
-     */
-    public static function getFormatedVersion(): string
-    {
-        $self = app(self::class);
-
-        return str_replace(
-            search: $self->getVersionConstants(),
-            replace: $self->getCurrentVersions(),
-            subject: $self->getFormat());
-    }
-    // endregion
 }

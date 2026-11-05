@@ -20,4 +20,10 @@ return [
     'disk_path' => env('APP_VERSIONING_DISK_PATH', 'version.yaml'),
 
     'git_path' => env('APP_VERSIONING_GIT_PATH', base_path().'/.git'),
+
+    /*
+     * Shown instead of the version when version.yaml is missing or invalid.
+     * A warning is logged each time.
+     */
+    'missing_version' => env('APP_VERSIONING_MISSING', ''),
 ];
