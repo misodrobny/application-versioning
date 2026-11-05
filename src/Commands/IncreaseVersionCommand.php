@@ -55,7 +55,9 @@ class IncreaseVersionCommand extends Command
                     return self::FAILURE;
                 }
 
-                $part = select(label: 'Which version do you want to increase?', options: self::PARTS, default: ApplicationVersioning::PATCH);
+                // A list of options makes select() return the chosen value, one of PARTS.
+                $choice = select(label: 'Which version do you want to increase?', options: self::PARTS, default: ApplicationVersioning::PATCH);
+                $part = in_array($choice, self::PARTS, true) ? $choice : null;
             }
 
             $versioning->bump($part);
