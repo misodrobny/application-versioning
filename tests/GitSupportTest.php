@@ -1,6 +1,7 @@
 <?php
 
 use DrobnyDev\ApplicationVersioning\Support\GitSupport;
+use Illuminate\Support\Facades\Cache;
 
 beforeEach(function () {
     $this->gitDir = sys_get_temp_dir().'/av-git-'.bin2hex(random_bytes(4));
@@ -53,4 +54,42 @@ it('honours the requested hash length', function () {
     file_put_contents($this->gitDir.'/HEAD', $this->sha."\n");
 
     expect(GitSupport::getCurrentHeadHash(forceRefresh: true, hashLength: 10))->toBe('a48f19c000');
+});
+
+it('applies hashLength on a memo hit', function () {
+    file_put_contents($this->gitDir.'/HEAD', $this->sha."\n");
+
+    expect(GitSupport::getCurrentHeadHash(forceRefresh: true))->toBe('a48f19c')
+        ->and(GitSupport::getCurrentHeadHash(hashLength: 10))->toBe('a48f19c000');
+});
+
+it('reads a changed HEAD after forceRefresh', function () {
+    file_put_contents($this->gitDir.'/HEAD', $this->sha."\n");
+    expect(GitSupport::getCurrentHeadHash(forceRefresh: true))->toBe('a48f19c');
+
+    file_put_contents($this->gitDir.'/HEAD', 'b'.str_repeat('1', 39)."\n");
+
+    expect(GitSupport::getCurrentHeadHash(forceRefresh: true))->toBe('b111111');
+});
+
+it('does not use Laravel Cache', function () {
+    file_put_contents($this->gitDir.'/HEAD', $this->sha."\n");
+    Cache::spy();
+
+    GitSupport::getCurrentHeadHash(forceRefresh: true);
+    GitSupport::getCurrentHeadHash();
+
+    Cache::shouldNotHaveReceived('has');
+    Cache::shouldNotHaveReceived('get');
+    Cache::shouldNotHaveReceived('set');
+});
+
+it('keeps a missing hash per git dir', function () {
+    config(['application-versioning.git_path' => $this->gitDir.'/missing']);
+    expect(GitSupport::getCurrentHeadHash(forceRefresh: true))->toBeNull();
+
+    file_put_contents($this->gitDir.'/HEAD', $this->sha."\n");
+    config(['application-versioning.git_path' => $this->gitDir]);
+
+    expect(GitSupport::getCurrentHeadHash())->toBe('a48f19c');
 });
