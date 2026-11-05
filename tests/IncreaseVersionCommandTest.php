@@ -82,8 +82,9 @@ it('fails instead of applying the prompt default when STDIN is not a terminal', 
 
     $details = "stdout:\n{$process->getOutput()}\nstderr:\n{$process->getErrorOutput()}";
 
-    $this->assertSame(1, $process->getExitCode(), $details);
-    $this->assertStringContainsString('--part', $process->getOutput(), $details);
+    if ($process->getExitCode() !== 1 || ! str_contains($process->getOutput(), '--part')) {
+        throw new RuntimeException("exit {$process->getExitCode()}\n{$details}");
+    }
     expect(app(ApplicationVersioning::class)->getFormattedVersion())->toBe('1.4.7');
 });
 
