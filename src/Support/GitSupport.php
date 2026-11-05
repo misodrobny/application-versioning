@@ -2,14 +2,24 @@
 
 namespace DrobnyDev\ApplicationVersioning\Support;
 
-use Illuminate\Support\Facades\Cache;
-use Psr\SimpleCache\InvalidArgumentException;
-
 class GitSupport
 {
+    /**
+     * @deprecated Unused since 0.3.0: the hash is no longer kept in Laravel Cache.
+     */
     public const string CACHE_KEY = 'GitSupport.CurrentHash';
 
+    /**
+     * @deprecated Unused since 0.3.0: the hash is no longer kept in Laravel Cache.
+     */
     public const int CACHE_TTL_SECONDS = 600; // 10 minutes
+
+    /**
+     * Full hashes already read, keyed by git directory. Null means none was found.
+     *
+     * @var array<string, ?string>
+     */
+    protected static array $hashes = [];
 
     /**
      * Examines .git folder and returns current heads' hash.
@@ -19,41 +29,43 @@ class GitSupport
      * hash itself, as deployments that check out a commit leave it). Anything
      * unreadable returns $default instead of throwing.
      *
-     * @param  bool  $forceRefresh  If TRUE, cache is forced refreshed
+     * The hash is read once per process and kept in memory: once per request
+     * under PHP-FPM, and until the worker restarts under Octane.
+     *
+     * @param  bool  $forceRefresh  If TRUE, the hash is read from .git again
      * @param  int  $hashLength  Required length of hash to return
      * @param  mixed|null  $default  Default value to return if no hash available
      * @return string|null Current heads' hash
-     *
-     * @throws InvalidArgumentException
      */
     public static function getCurrentHeadHash(
         bool $forceRefresh = false,
         int $hashLength = 7,
         mixed $default = null
     ): ?string {
-        if (! $forceRefresh && Cache::has(static::CACHE_KEY)) {
-            return Cache::get(static::CACHE_KEY);
+        $gitDir = (string) config('application-versioning.git_path');
+
+        if ($forceRefresh || ! array_key_exists($gitDir, static::$hashes)) {
+            static::$hashes[$gitDir] = static::readHeadHash($gitDir);
         }
 
-        $gitDir = (string) config('application-versioning.git_path');
+        $hash = static::$hashes[$gitDir];
+
+        return $hash === null ? $default : substr($hash, 0, $hashLength);
+    }
+
+    protected static function readHeadHash(string $gitDir): ?string
+    {
         $head = static::read($gitDir, 'HEAD');
 
         if ($head === null) {
-            return $default;
+            return null;
         }
 
         $hash = str_starts_with($head, 'ref:')
             ? static::resolveRef($gitDir, trim(substr($head, 4)))
             : $head;
 
-        if ($hash === null || preg_match('/^[0-9a-f]{40,64}$/', $hash) !== 1) {
-            return $default;
-        }
-
-        $currentHash = substr($hash, 0, $hashLength);
-        Cache::set(static::CACHE_KEY, $currentHash, now()->addSeconds(static::CACHE_TTL_SECONDS));
-
-        return $currentHash;
+        return $hash !== null && preg_match('/^[0-9a-f]{40,64}$/', $hash) === 1 ? $hash : null;
     }
 
     /**
