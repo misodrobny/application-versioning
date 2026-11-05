@@ -14,5 +14,9 @@ class TestCase extends Orchestra
         ];
     }
 
-    public function getEnvironmentSetUp($app): void {}
+    public function getEnvironmentSetUp($app): void
+    {
+        // Testbench defaults to the database cache store, which has no table here.
+        $app['config']->set('cache.default', 'array');
+    }
 }

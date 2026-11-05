@@ -5,7 +5,10 @@ namespace DrobnyDev\ApplicationVersioning;
 use DrobnyDev\ApplicationVersioning\Exceptions\InvalidArgumentException;
 use DrobnyDev\ApplicationVersioning\Exceptions\VersionFileException;
 use DrobnyDev\ApplicationVersioning\Support\GitSupport;
+use Illuminate\Contracts\Cache\LockProvider;
+use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Contracts\Filesystem\Filesystem;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\Yaml\Exception\ParseException;
@@ -41,27 +44,27 @@ class ApplicationVersioning
     }
 
     /**
-     * @throws InvalidArgumentException
+     * @throws InvalidArgumentException|VersionFileException|LockTimeoutException
      */
     public function increaseMajor(): void
     {
-        $this->increaseVersion(self::MAJOR);
+        $this->bump(self::MAJOR);
     }
 
     /**
-     * @throws InvalidArgumentException
+     * @throws InvalidArgumentException|VersionFileException|LockTimeoutException
      */
     public function increaseMinor(): void
     {
-        $this->increaseVersion(self::MINOR);
+        $this->bump(self::MINOR);
     }
 
     /**
-     * @throws InvalidArgumentException
+     * @throws InvalidArgumentException|VersionFileException|LockTimeoutException
      */
     public function increasePatch(): void
     {
-        $this->increaseVersion(self::PATCH);
+        $this->bump(self::PATCH);
     }
 
     public function exists(): bool
@@ -142,18 +145,74 @@ class ApplicationVersioning
     }
 
     /**
-     * @throws InvalidArgumentException
+     * @throws InvalidArgumentException|VersionFileException|LockTimeoutException
      */
     public function increaseVersion(string $type): void
     {
-        if ($type !== self::MAJOR && $type !== self::MINOR && $type !== self::PATCH) {
+        $this->bump($type);
+    }
+
+    /**
+     * Bumps the version and writes it back.
+     *
+     * Calendar versions (major >= 2000) ignore $part: within the current year
+     * and month the patch goes up, otherwise the version becomes year.month.1.
+     * SemVer needs $part and resets the parts below it.
+     *
+     * @throws InvalidArgumentException|VersionFileException|LockTimeoutException
+     */
+    public function bump(?string $part = null): void
+    {
+        if ($part !== null && ! in_array($part, [self::MAJOR, self::MINOR, self::PATCH], true)) {
             throw new InvalidArgumentException('Invalid version type');
         }
 
-        $yamlContents = $this->getYamlContent();
-        $yamlContents['version']['current'][$type]++;
+        $location = $this->disk === null ? $this->versionFilePath : "{$this->disk}|{$this->diskPath}";
+        $write = function () use ($part): void {
+            $content = $this->getYamlContent();
+            $content['version']['current'] = array_merge(
+                $content['version']['current'],
+                $this->nextVersion($content['version']['current'], $part),
+            );
 
-        $this->write(Yaml::dump($yamlContents));
+            $this->write(Yaml::dump($content, 2));
+        };
+
+        $store = Cache::getStore();
+
+        if (! $store instanceof LockProvider) {
+            $write();
+
+            return;
+        }
+
+        $store->lock('application-versioning:bump:'.md5($location), 10)->block(5, $write);
+    }
+
+    /**
+     * @param  array<string, mixed>  $current
+     * @return array{major: int, minor: int, patch: int}
+     *
+     * @throws InvalidArgumentException
+     */
+    protected function nextVersion(array $current, ?string $part): array
+    {
+        [$major, $minor, $patch] = [$current[self::MAJOR], $current[self::MINOR], $current[self::PATCH]];
+
+        if ($major >= 2000) {
+            $now = now();
+
+            return $major === $now->year && $minor === $now->month
+                ? [self::MAJOR => $major, self::MINOR => $minor, self::PATCH => $patch + 1]
+                : [self::MAJOR => $now->year, self::MINOR => $now->month, self::PATCH => 1];
+        }
+
+        return match ($part) {
+            self::MAJOR => [self::MAJOR => $major + 1, self::MINOR => 0, self::PATCH => 0],
+            self::MINOR => [self::MAJOR => $major, self::MINOR => $minor + 1, self::PATCH => 0],
+            self::PATCH => [self::MAJOR => $major, self::MINOR => $minor, self::PATCH => $patch + 1],
+            default => throw new InvalidArgumentException('A SemVer version needs the part to bump: major, minor or patch.'),
+        };
     }
 
     /**

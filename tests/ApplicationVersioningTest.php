@@ -3,6 +3,7 @@
 use DrobnyDev\ApplicationVersioning\ApplicationVersioning;
 use DrobnyDev\ApplicationVersioning\Exceptions\VersionFileException;
 use DrobnyDev\ApplicationVersioning\Facades\ApplicationVersioning as ApplicationVersioningFacade;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
@@ -34,6 +35,8 @@ it('formats the version from the local file', function () {
 });
 
 it('increases a part and writes it back', function () {
+    $this->travelTo(Carbon::create(2026, 10, 20));
+
     app(ApplicationVersioning::class)->increasePatch();
 
     expect(app(ApplicationVersioning::class)->getYamlContent()['version']['current']['patch'])->toBe(4);
@@ -49,7 +52,7 @@ it('reads and writes version.yaml through a configured disk', function () {
     $versioning->increaseMinor();
 
     expect($versioning->exists())->toBeTrue()
-        ->and(ApplicationVersioning::getFormatedVersion())->toBe('1.3.3')
+        ->and(ApplicationVersioning::getFormatedVersion())->toBe('1.3.0')
         ->and(Storage::disk('versions')->get('app/version.yaml'))->toContain('minor: 3');
 });
 
