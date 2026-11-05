@@ -22,8 +22,10 @@ class IncreaseVersionCommand extends Command
     {
         $part = $this->option('part');
 
-        if ($part !== null && ! in_array($part, self::PARTS, true)) {
-            $this->error("Unknown part \"{$part}\". Use major, minor or patch.");
+        // option() is typed array|string|bool|...; narrow it here instead of relying on
+        // Larastan reading the signature, which only works when the command is registered.
+        if ($part !== null && (! is_string($part) || ! in_array($part, self::PARTS, true))) {
+            $this->error('Unknown part "'.(is_string($part) ? $part : get_debug_type($part)).'". Use major, minor or patch.');
 
             return self::FAILURE;
         }

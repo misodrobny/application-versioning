@@ -80,9 +80,11 @@ it('fails instead of applying the prompt default when STDIN is not a terminal', 
     $process = new Process([PHP_BINARY, __DIR__.'/Fixtures/increase-without-tty.php', $this->versionFile]);
     $process->run();
 
-    expect($process->getExitCode())->toBe(1)
-        ->and($process->getOutput())->toContain('--part')
-        ->and(app(ApplicationVersioning::class)->getFormattedVersion())->toBe('1.4.7');
+    $details = "stdout:\n{$process->getOutput()}\nstderr:\n{$process->getErrorOutput()}";
+
+    $this->assertSame(1, $process->getExitCode(), $details);
+    $this->assertStringContainsString('--part', $process->getOutput(), $details);
+    expect(app(ApplicationVersioning::class)->getFormattedVersion())->toBe('1.4.7');
 });
 
 it('reports a cache store that cannot lock instead of crashing', function () {

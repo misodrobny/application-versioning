@@ -51,7 +51,11 @@ jobs:
           echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
 
       - name: Install dependencies
+        shell: bash
         run: |
+          # Every laravel/framework 11.x release carries security advisories, which Composer
+          # blocks by default. Allow them here only to keep testing Laravel 11 support.
+          if [ "${{ matrix.laravel }}" = "11.*" ]; then composer config policy.advisories.block false; fi
           composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
           composer update --${{ matrix.stability }} --prefer-dist --no-interaction
 
