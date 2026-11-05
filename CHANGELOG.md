@@ -27,11 +27,9 @@ All notable changes to `application-versioning` will be documented in this file.
 - `getFormatedVersion()` is deprecated. Use `getFormattedVersion()`.
 - `spatie/laravel-package-tools` is no longer a dependency. The command names and the `application-versioning-config` publish tag are unchanged. The install command no longer asks to star the repository.
 - `GitSupport::CACHE_KEY` and `GitSupport::CACHE_TTL_SECONDS` are deprecated and unused.
-- To use `missing_version`, add it to a published `config/application-versioning.php`:
-
-```php
-'missing_version' => env('APP_VERSIONING_MISSING', ''),
-```
+- An already published `config/application-versioning.php` needs no change. The package merges its own defaults under it (`mergeConfigFrom`), so `missing_version` defaults to an empty string and can be set with `APP_VERSIONING_MISSING`.
+- `getFormattedVersion()` now catches every error while reading the version (an unknown disk, a storage error, an unreadable file), logs a warning and returns `missing_version`.
+- `application-version:increase` also refuses to prompt when STDIN is not a terminal (CI, git hooks, `ssh host php artisan …` without `-n`), instead of applying the default part.
 
 ## 0.2.0 - 2026-10-16
 

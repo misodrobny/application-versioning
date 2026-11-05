@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
+use Throwable;
 
 /**
  * Bound as a singleton by the service provider: resolve it from the container
@@ -256,7 +257,8 @@ class ApplicationVersioning
                 search: $this->getVersionConstants(),
                 replace: array_map(strval(...), $this->getCurrentVersions()),
                 subject: $this->getFormat());
-        } catch (VersionFileException $e) {
+        } catch (Throwable $e) {
+            // Any failure, not only VersionFileException: an unknown disk, a storage error or an unreadable file.
             Log::warning($e->getMessage());
 
             return (string) config('application-versioning.missing_version', '');

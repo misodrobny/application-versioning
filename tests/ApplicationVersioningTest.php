@@ -126,3 +126,13 @@ it('keeps the deprecated static getFormatedVersion working', function () {
     expect(ApplicationVersioning::getFormatedVersion())->toBe('2026.10.3 - ')
         ->and(ApplicationVersioningFacade::getFormattedVersion())->toBe('2026.10.3 - ');
 });
+
+it('returns the fallback when the configured disk does not exist', function () {
+    config(['application-versioning.disk' => 'nope', 'application-versioning.missing_version' => 'dev']);
+    app()->forgetInstance(ApplicationVersioning::class);
+    Log::spy();
+
+    expect(app(ApplicationVersioning::class)->getFormattedVersion())->toBe('dev');
+
+    Log::shouldHaveReceived('warning')->once();
+});

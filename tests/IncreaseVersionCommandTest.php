@@ -2,6 +2,7 @@
 
 use DrobnyDev\ApplicationVersioning\ApplicationVersioning;
 use Illuminate\Support\Carbon;
+use Symfony\Component\Process\Process;
 
 beforeEach(function () {
     $this->versionFile = sys_get_temp_dir().'/av-cmd-'.bin2hex(random_bytes(4)).'.yaml';
@@ -71,4 +72,26 @@ it('fails when version.yaml is missing and not interactive', function () {
     $this->artisan('application-version:increase', ['--part' => 'patch', '--no-interaction' => true])->assertExitCode(1);
 
     expect(file_exists($this->versionFile))->toBeFalse();
+});
+
+it('fails instead of applying the prompt default when STDIN is not a terminal', function () {
+    ($this->write)('1.4.7');
+
+    $process = new Process([PHP_BINARY, __DIR__.'/Fixtures/increase-without-tty.php', $this->versionFile]);
+    $process->run();
+
+    expect($process->getExitCode())->toBe(1)
+        ->and($process->getOutput())->toContain('--part')
+        ->and(app(ApplicationVersioning::class)->getFormattedVersion())->toBe('1.4.7');
+});
+
+it('reports a cache store that cannot lock instead of crashing', function () {
+    ($this->write)('1.4.7');
+    config(['cache.default' => 'database']);
+
+    $this->artisan('application-version:increase', ['--part' => 'patch'])
+        ->expectsOutputToContain('cache_locks')
+        ->assertExitCode(1);
+
+    expect(app(ApplicationVersioning::class)->getFormattedVersion())->toBe('1.4.7');
 });

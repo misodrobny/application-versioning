@@ -3,10 +3,9 @@
 namespace DrobnyDev\ApplicationVersioning\Commands;
 
 use DrobnyDev\ApplicationVersioning\ApplicationVersioning;
-use DrobnyDev\ApplicationVersioning\Exceptions\InvalidArgumentException;
-use DrobnyDev\ApplicationVersioning\Exceptions\VersionFileException;
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Cache\LockTimeoutException;
+use Throwable;
 
 use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\select;
@@ -30,7 +29,7 @@ class IncreaseVersionCommand extends Command
         }
 
         if (! $versioning->exists()) {
-            if (! $this->input->isInteractive()) {
+            if (! $this->canPrompt()) {
                 $this->error('version.yaml not found. Run php artisan application-versioning:install first.');
 
                 return self::FAILURE;
@@ -49,7 +48,7 @@ class IncreaseVersionCommand extends Command
             $old = $versioning->getFormattedVersion();
 
             if (! $versioning->isCalendar() && $part === null) {
-                if (! $this->input->isInteractive()) {
+                if (! $this->canPrompt()) {
                     $this->error('A SemVer version needs --part=major, --part=minor or --part=patch.');
 
                     return self::FAILURE;
@@ -61,8 +60,13 @@ class IncreaseVersionCommand extends Command
             }
 
             $versioning->bump($part);
-        } catch (VersionFileException|LockTimeoutException|InvalidArgumentException $e) {
-            $this->error($e->getMessage() ?: 'Another bump holds the version.yaml lock. Try again.');
+        } catch (LockTimeoutException) {
+            $this->error('Another bump holds the version.yaml lock. Try again.');
+
+            return self::FAILURE;
+        } catch (Throwable $e) {
+            // Includes a cache store that fails to lock, e.g. a missing cache_locks table.
+            $this->error($e->getMessage());
 
             return self::FAILURE;
         }
@@ -70,5 +74,16 @@ class IncreaseVersionCommand extends Command
         $this->info("Version increased: {$old} → {$versioning->getFormattedVersion()}");
 
         return self::SUCCESS;
+    }
+
+    /**
+     * Whether a prompt would really ask. Laravel turns prompts off when STDIN
+     * is not a terminal, outside tests (ConfiguresPrompts::configurePrompts),
+     * and select() then returns its default without asking.
+     */
+    protected function canPrompt(): bool
+    {
+        return $this->input->isInteractive()
+            && ((defined('STDIN') && stream_isatty(STDIN)) || $this->laravel->runningUnitTests());
     }
 }
